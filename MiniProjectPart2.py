@@ -1,4 +1,3 @@
-# Comment added to test Github integration
 import pickle
 
 try:
