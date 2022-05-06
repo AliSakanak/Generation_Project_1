@@ -58,9 +58,23 @@ def orders_menu():
     print("[5] Delete Order\n")
 
 
-def save_menu():
+def ask_save():
     print("\n[1] Yes")
     print("[0] No")
+
+    save_option = input("Would you like to save changes? ").lower().strip()
+    if save_option == '1' or save_option == 'yes':
+        print("Saving changes...")
+        pickle.dump(products, open("products.dat", "wb"))
+        pickle.dump(couriers, open("couriers.dat", "wb"))
+        pickle.dump(orders, open("orders.dat", "wb"))
+        print("Save successful.\nProgram terminated.")
+        quit()
+    elif save_option == '0' or save_option == 'no':
+        print("Quitting without saving changes!\nProgram terminated.")
+        quit()
+    else:
+        print("Choose a valid option!")
 
 
 def index_list(item_list):
@@ -95,7 +109,7 @@ def update_item(item_list):
 def delete_item(item_list):
     try:
         deleted_item = int(input("Type number of item you wish to delete: "))
-        print(f"Deleting {item_list[deleted_item]} from list.")
+        print(f"Deleted {item_list[deleted_item]} from list.")
         del item_list[deleted_item]
     except IndexError:
         print("No such number item exists.")
@@ -107,7 +121,7 @@ def create_new_order():
     try:
         customer_name = input("Type customer name: ").title().strip()
         customer_address = input("Type customer address: ").title().strip()
-        customer_phone_number = int(input("Type customer's phone number: "))
+        customer_phone_number = input("Type customer's phone number: ").strip()
         index_list(couriers)
         courier_input = int(input("Type number of courier you wish to use: "))
         courier_choice = couriers[courier_input]
@@ -119,8 +133,9 @@ def create_new_order():
             "Status": order_status_list[0],
         }
         orders.append(order_dictionary)
+        print("Order successfully created!")
     except ValueError:
-        print("Customer phone number takes only digit input!")
+        print("Please enter correct number associated with courier.")
     except IndexError:
         print("No such number item exists.")
     except Exception as e:
@@ -143,7 +158,7 @@ while True:
         print("Please enter a number option!")
         continue
     if option == 0:
-        print("Exiting App")
+        print("\nExiting App...")
         break
     elif option not in range(4):
         print(
@@ -229,13 +244,14 @@ while True:
                 for i, key_value in enumerate(order_dict_choice.items()):
                     print(f"[{i}] {key_value[0]}: {key_value[1]}")
                 order_key_choice = int(input("Type number of item you want to edit: "))
-                order_value_change = input("Type input you'd like to change to: ").strip()
+                order_value_change = input("Type input you'd like to change to: ").strip().title()
                 keys = list(order_dict_choice.keys())
                 if len(order_value_change) > 0:
+                    old_item = order_dict_choice[keys[order_key_choice]]
                     order_dict_choice[keys[order_key_choice]] = order_value_change
-                    print("Changes made successfully")
+                    print(f"{old_item} changed to {order_value_change}.")
                 else:
-                    print("No changes made")
+                    print("No changes were made")
             except ValueError:
                 print("Please enter a valid number option.")
             except IndexError:
@@ -249,20 +265,4 @@ while True:
             )
 
 while True:
-    save_menu()
-    try:
-        save_option = int(input("Would you like to save changes? "))
-        if save_option == 1:
-            print("Saving changes...")
-            pickle.dump(products, open("products.dat", "wb"))
-            pickle.dump(couriers, open("couriers.dat", "wb"))
-            pickle.dump(orders, open("orders.dat", "wb"))
-            print("Save successful. Quitting.")
-            quit()
-        elif save_option == 0:
-            print("Quitting without saving changes!")
-            quit()
-        else:
-            print("Choose a valid option!")
-    except ValueError:
-        print("Choose a number option!")
+    ask_save()
