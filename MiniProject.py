@@ -63,14 +63,14 @@ def ask_save():
     print("[0] No")
 
     save_option = input("Would you like to save changes? ").lower().strip()
-    if save_option == '1' or save_option == 'yes':
+    if save_option == "1" or save_option == "yes":
         print("Saving changes...")
         pickle.dump(products, open("products.dat", "wb"))
         pickle.dump(couriers, open("couriers.dat", "wb"))
         pickle.dump(orders, open("orders.dat", "wb"))
         print("Save successful.\nProgram terminated.")
         quit()
-    elif save_option == '0' or save_option == 'no':
+    elif save_option == "0" or save_option == "no":
         print("Quitting without saving changes!\nProgram terminated.")
         quit()
     else:
@@ -149,7 +149,13 @@ order_status_list = [
     "nearby",
     "delivered",
 ]
-
+new_launch = True
+while new_launch:
+    print(
+        "\n*Welcome to the app! Navigate through the application by inputting"
+        " the number seen in [square brackets] and pressing Enter."
+    )
+    new_launch = False
 while True:
     try:
         main_menu()
@@ -162,7 +168,7 @@ while True:
         break
     elif option not in range(4):
         print(
-            "Invalid option. Please choose a correct number from the list for the corresponding action."
+            "That number option doesn't seem to exist! Please choose a correct number from the list for the corresponding action."
         )
         continue
     while option == 1:
@@ -225,13 +231,19 @@ while True:
         elif orders_menu_choice == 3:
             index_list(orders)
             try:
-                order_number_input = int(input("Type number of order you want to change status for: "))
+                order_number_input = int(
+                    input("Type number of order you want to change status for: ")
+                )
                 old_order_status = orders[order_number_input]["Status"]
                 index_list(order_status_list)
-                order_status_input = int(input("Type number of status you wish to update to: "))
+                order_status_input = int(
+                    input("Type number of status you wish to update to: ")
+                )
                 new_order_status = order_status_list[order_status_input]
                 orders[order_number_input]["Status"] = new_order_status
-                print(f"Order {order_number_input} changed from {old_order_status} to {new_order_status}.")
+                print(
+                    f"Order [{order_number_input}] changed from {old_order_status} to {new_order_status}."
+                )
             except ValueError:
                 print("Please enter a valid number option.")
             except IndexError:
@@ -239,19 +251,23 @@ while True:
         elif orders_menu_choice == 4:
             index_list(orders)
             try:
-                order_index_input = int(input("Type number of order you want to edit: "))
+                order_index_input = int(
+                    input("Type number of order you want to edit: ")
+                )
                 order_dict_choice = orders[order_index_input]
                 for i, key_value in enumerate(order_dict_choice.items()):
                     print(f"[{i}] {key_value[0]}: {key_value[1]}")
                 order_key_choice = int(input("Type number of item you want to edit: "))
-                order_value_change = input("Type input you'd like to change to: ").strip().title()
+                order_value_change = (
+                    input("Type input you'd like to change to: ").strip().title()
+                )
                 keys = list(order_dict_choice.keys())
                 if len(order_value_change) > 0:
                     old_item = order_dict_choice[keys[order_key_choice]]
                     order_dict_choice[keys[order_key_choice]] = order_value_change
                     print(f"{old_item} changed to {order_value_change}.")
                 else:
-                    print("No changes were made")
+                    print("No changes were made as no input was given.")
             except ValueError:
                 print("Please enter a valid number option.")
             except IndexError:
