@@ -54,7 +54,7 @@ def orders_menu():
     print("[1] View Orders List")
     print("[2] Create New Order")
     print("[3] Update Existing Order Status")
-    # TO BE IMPLEMENTED print("[4] Update Existing Order")
+    print("[4] Update Existing Order Details")
     print("[5] Delete Order\n")
 
 
@@ -221,9 +221,25 @@ while True:
                 print("Please enter a valid number option.")
             except IndexError:
                 print("Item number doesn't exist.")
-        # TO BE IMPLEMENTED elif orders_menu_choice == 4:
-        #     index_list(orders)
-        #  
+        elif orders_menu_choice == 4:
+            index_list(orders)
+            try:
+                order_index_input = int(input("Type number of order you want to edit: "))
+                order_dict_choice = orders[order_index_input]
+                for i, key_value in enumerate(order_dict_choice.items()):
+                    print(f"[{i}] {key_value[0]}: {key_value[1]}")
+                order_key_choice = int(input("Type number of item you want to edit: "))
+                order_value_change = input("Type input you'd like to change to: ").strip()
+                keys = list(order_dict_choice.keys())
+                if len(order_value_change) > 0:
+                    order_dict_choice[keys[order_key_choice]] = order_value_change
+                    print("Changes made successfully")
+                else:
+                    print("No changes made")
+            except ValueError:
+                print("Please enter a valid number option.")
+            except IndexError:
+                print("Item number doesn't exist.")
         elif orders_menu_choice == 5:
             index_list(orders)
             delete_item(orders)
