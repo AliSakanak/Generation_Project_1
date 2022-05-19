@@ -15,14 +15,6 @@ except pymysql.OperationalError as e:
     print(f"Error: {e}\nUnable to successfully connect to Database.")
 #sleep(1)
 
-try:
-    orders = pickle.load(open("orders.dat", "rb"))
-    print("\nOrders save found and loaded.")
-except FileNotFoundError:
-    print("\nExisting orders not found. Creating orders file.")
-    orders = []
-
-
 def main_menu():
     print("\n___Main Menu___")
     print("[0] Exit App")
@@ -77,13 +69,7 @@ def ask_save():
     else:
         print("Choose a valid option!")
 
-
-def index_list(item_list):
-    for i, item in enumerate(item_list):
-        print(f"[{i}] {item}")
-
-
-def view_list_new(item_list):
+def view_list(item_list):
     cursor = connection.cursor()
     cursor.execute(f"SELECT * FROM {item_list}")
     result = cursor.fetchall()
@@ -97,10 +83,6 @@ def view_list_new(item_list):
             print(item)
         print(f"Number of items: {len(result)}")
     cursor.close()
-
-def view_list(item_list):
-    print(item_list)
-    print(f"Number of items: {len(item_list)}")
 
 def add_new_product():
     try:
@@ -137,7 +119,7 @@ def add_new_order():
         if len(customer_name) == 0 or len(customer_address) == 0 or len(customer_phone_number) == 0:
             print(f"Error: Input cannot be blank.")
             return
-        view_list_new("products")
+        view_list("products")
         products_input = input("Type ID of products you wish to order, seperated by commas: ")
         removed_spaces = products_input.replace(" ","")
         listed_version = removed_spaces.split(",")
@@ -147,10 +129,11 @@ def add_new_order():
             products_choice = cursor.fetchone()
             products_list_chosen.append(products_choice)
         print(f"*{products_list_chosen} added to order*")
-        view_list_new("couriers")
+        view_list("couriers")
         courier_input = int(input("Type ID of courier you wish to use: "))
-        cursor.execute(f"SELECT couriers_id FROM mini_project.couriers WHERE couriers_id = {courier_input}")
+        cursor.execute(f"SELECT name FROM mini_project.couriers WHERE couriers_id = {courier_input}")
         courier_choice = cursor.fetchone()[0]
+        print(courier_choice)
         print(f"*{courier_choice} chosen as courier*\n")
         sql = f"""INSERT INTO mini_project.orders (customer_name, customer_address, customer_phone, couriers_id, status_id, products_id) 
         VALUES (%s,%s,%s,%s,%s,%s)"""
@@ -197,6 +180,35 @@ def update_courier():
             print(f"*{old_item} updated to {new_number} successfully*")
         else:
             print('*Courier phone number not changed as entry was left blank*')
+    except ValueError:
+        print(f"ERROR: Please input the correct value type for the associated field")
+    except pymysql.OperationalError:
+        print(f"ERROR: operationalerror")
+
+def update_order_status():
+    try:
+        cursor = connection.cursor()
+        order_id_input = int(input("Type the order_id you want to update status for: "))
+        cursor.execute(f"SELECT * FROM orders WHERE orders_id = {order_id_input}")
+        old_item = cursor.fetchone()
+        print(old_item)
+        if old_item == None:
+            print(f"ERROR: The orders_id you have entered ({order_id_input}) could not be found")
+            return
+        print(f"*{old_item} selected*")
+        view_list("orders_status")
+        new_status_input = int(input("Type status_id of status name you wish to update to, or leave blank for no change: "))
+        cursor.execute(f"SELECT name FROM orders_status WHERE status_id = {new_status_input}")
+        status_name_choice = cursor.fetchone()[0]
+        if len(str(new_status_input)) > 0:
+            cursor = connection.cursor()
+            sql = F"UPDATE orders SET status_id = {new_status_input} WHERE orders_id = {order_id_input}"
+            cursor.execute(sql)
+            connection.commit()
+            cursor.close()
+            print(f"\n*{old_item} updated to {status_name_choice} successfully*")
+        else:
+            print('\n*Order status not changed as entry was left blank*')
     except ValueError:
         print(f"ERROR: Please input the correct value type for the associated field")
     except pymysql.OperationalError:
@@ -273,45 +285,6 @@ def delete_item_new(table):
     except Exception as e:
         print(f"Unexpected error: {e}")
 
-
-
-# def delete_item(item_list):
-#     try:
-#         deleted_item = int(input("Type number of item you wish to delete: "))
-#         print(f"Deleted {item_list[deleted_item]} from list.")
-#         del item_list[deleted_item]
-#     except IndexError:
-#         print("No such number item exists.")
-#     except ValueError:
-#         print("Please enter the number of the item, not the word.")
-
-
-def create_new_order():
-    try:
-        customer_name = input("Type customer name: ").title().strip()
-        customer_address = input("Type customer address: ").title().strip()
-        customer_phone_number = input("Type customer's phone number: ").strip()
-        index_list(couriers)
-        courier_input = int(input("Type number of courier you wish to use: "))
-        courier_choice = couriers[courier_input]
-        order_dictionary = {
-            "Customer_Name": customer_name,
-            "Customer_Address": customer_address,
-            "Customer_Phone_Number": customer_phone_number,
-            "Courier": courier_choice,
-            "Status": order_status_list[0]
-            #"Ordered Items": [indexes from productlist] 
-        }
-        orders.append(order_dictionary)
-        print("Order successfully created!")
-    except ValueError:
-        print("Please enter correct number associated with courier.")
-    except IndexError:
-        print("No such number item exists.")
-    except Exception as e:
-        print(f"Unidentified error: {e}")
-
-
 order_status_list = [
     "preparing",
     "assigning driver",
@@ -361,14 +334,14 @@ while True:
         if product_menu_choice == 0:
             break
         elif product_menu_choice == 1:
-            view_list_new("products")
+            view_list("products")
         elif product_menu_choice == 2:
             add_new_product()
         elif product_menu_choice == 3:
-            view_list_new("products")
+            view_list("products")
             update_product()
         elif product_menu_choice == 4:
-            view_list_new("products")
+            view_list("products")
             delete_item_new("products")
         else:
             print("Enter a valid option")
@@ -382,14 +355,14 @@ while True:
         if courier_menu_choice == 0:
             break
         elif courier_menu_choice == 1:
-            view_list_new("couriers")
+            view_list("couriers")
         elif courier_menu_choice == 2:
             add_new_courier()
         elif courier_menu_choice == 3:
-            view_list_new("couriers")
+            view_list("couriers")
             update_courier()
         elif courier_menu_choice == 4:
-            view_list_new("couriers")
+            view_list("couriers")
             delete_item_new("couriers")
         else:
             print(
@@ -405,31 +378,14 @@ while True:
         if orders_menu_choice == 0:
             break
         elif orders_menu_choice == 1:
-            view_list_new("orders")
+            view_list("orders")
         elif orders_menu_choice == 2:
             add_new_order()
         elif orders_menu_choice == 3:
-            index_list(orders)
-            try:
-                order_number_input = int(
-                    input("Type number of order you want to change status for: ")
-                )
-                old_order_status = orders[order_number_input]["Status"]
-                index_list(order_status_list)
-                order_status_input = int(
-                    input("Type number of status you wish to update to: ")
-                )
-                new_order_status = order_status_list[order_status_input]
-                orders[order_number_input]["Status"] = new_order_status
-                print(
-                    f"Order [{order_number_input}] changed from {old_order_status} to {new_order_status}."
-                )
-            except ValueError:
-                print("Please enter a valid number option.")
-            except IndexError:
-                print("Item number doesn't exist.")
+            view_list("orders")
+            update_order_status()
         elif orders_menu_choice == 4:
-            index_list(orders)
+            view_list("orders")
             try:
                 order_index_input = int(
                     input("Type number of order you want to edit: ")
@@ -453,8 +409,8 @@ while True:
             except IndexError:
                 print("Item number doesn't exist.")
         elif orders_menu_choice == 5:
-            index_list(orders)
-            delete_item(orders)
+            view_list("orders")
+            delete_item_new("orders")
         else:
             print(
                 "Invalid option. Please choose a correct number from the list for the corresponding action."
