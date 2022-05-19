@@ -2,6 +2,7 @@ from logging import exception
 import pickle
 import pymysql
 from time import sleep
+# I WOULD LIKE TO ADD DATE/TIME OF ORDER CREATED
 
 try:
     connection = pymysql.connect(
@@ -13,7 +14,7 @@ try:
     print ("Connected to cafe's database")
 except pymysql.OperationalError as e:
     print(f"Error: {e}\nUnable to successfully connect to Database.")
-#sleep(1)
+sleep(1)
 
 def main_menu():
     print("\n___Main Menu___")
@@ -185,6 +186,81 @@ def update_courier():
     except pymysql.OperationalError:
         print(f"ERROR: operationalerror")
 
+def update_order_details():
+    try:
+        cursor = connection.cursor()
+        order_id_input = int(input("Type the orders_id of order you wish to update: "))
+        cursor.execute(f"SELECT * FROM orders WHERE orders_id = {order_id_input}")
+        old_order = cursor.fetchone()
+        if old_order == None:
+            print(f"ERROR: The orders_id you have entered ({order_id_input}) could not be found")
+            return
+        print(f"*{old_order} selected*")
+        new_name = input("Type updated name of customer, or leave blank for no change: ").strip().title()
+        new_address = input("Type updated customer address, or leave blank for no change: ").strip()
+        new_phonenumber = input("Type updated customer phone number, or leave blank for no change: ").strip()
+        view_list("products")
+        products_input = input("Type ID of products you wish to overwrite with, or leave blank for no change: ")
+        removed_spaces = products_input.replace(" ","")
+        listed_version = removed_spaces.split(",")
+        view_list("couriers")
+        courier_input = input("Type ID of courier you want to use, or leave blank for no change: ").strip()
+        if len(removed_spaces) > 0:
+            products_list_chosen = []
+            for number in listed_version:
+                cursor.execute(f"SELECT * FROM mini_project.products WHERE products_id = {number}")
+                products_choice = cursor.fetchone()
+                products_list_chosen.append(products_choice)
+            print(products_list_chosen)
+            sql = f"UPDATE orders SET products_id = \'{products_input}\' WHERE orders_id = {order_id_input}"
+            cursor.execute(sql)
+            connection.commit()
+            cursor.close()
+            print(f"*{products_list_chosen} added to order*")
+        else:
+            print('\n*Products ordered not changed as entry was left blank*')
+        if len(courier_input) > 0:
+            courier_input = int(courier_input)
+            cursor = connection.cursor()
+            sql = F"UPDATE orders SET couriers_id = \'{courier_input}\' WHERE orders_id = {order_id_input}"
+            cursor.execute(sql)
+            connection.commit()
+            cursor.close()
+            print(f"\n*{old_order} updated to {courier_input} successfully*")
+        else:
+            print("\n*Courier was not changed as entry was left blank*")
+        if len(new_name) > 0:
+            cursor = connection.cursor()
+            sql = F"UPDATE orders SET customer_name = \'{new_name}\' WHERE orders_id = {order_id_input}"
+            cursor.execute(sql)
+            connection.commit()
+            cursor.close()
+            print(f"\n*{old_order} updated to {new_name} successfully*")
+        else:
+            print('\n*Customer name not changed as entry was left blank*')
+        if len(new_address) > 0:
+            cursor = connection.cursor()
+            sql = f"UPDATE orders SET customer_address = \'{new_address}\' WHERE orders_id = {order_id_input}"
+            cursor.execute(sql)
+            connection.commit()
+            cursor.close()
+            print(f"*{old_order} updated to {new_address} successfully*")
+        else:
+            print('\n*Customer address not changed as entry was left blank*')
+        if len(new_phonenumber) > 0:
+            cursor = connection.cursor()
+            sql = f"UPDATE orders SET customer_phone= \'{new_phonenumber}\' WHERE orders_id = {order_id_input}"
+            cursor.execute(sql)
+            connection.commit()
+            cursor.close()
+            print(f"*{old_order} updated to {new_phonenumber} successfully*")
+        else:
+            print("\n*Customer phone number not changed as entry was left blank*")
+    except ValueError:
+        print(f"ERROR: ID not found")
+    except pymysql.OperationalError:
+        print(f"ERROR: operationalerror")
+
 def update_order_status():
     try:
         cursor = connection.cursor()
@@ -249,27 +325,7 @@ def update_product():
     except pymysql.OperationalError:
         print(f"ERROR: Please ensure that price is a float value")
 
-
-#def add_new_item(item_list):
-    # item_name = input("Type the item you want to add: ").title().strip()
-    # item_list.append(item_name)
-    # print(f"{item_name} added to list.")
-    # #INSERT INTO `mini_project`.`products` (`product_id`, `name`, `price`) VALUES ('2', 'Coke', '0.99');
-
-
-# def update_item(item_list):
-#     try:
-#         user_choice = int(input("Type number of item you wish to update: "))
-#         old_item = item_list[user_choice]
-#         new_item = input("Type name of new item: ").title().strip()
-#         item_list[user_choice] = new_item
-#         print(f"{old_item} changed to {new_item}.")
-#     except IndexError:
-#         print("No such number item exists.")
-#     except ValueError:
-#         print("Please enter the number of the item, not the word.")
-
-def delete_item_new(table):
+def delete_item(table):
     try:
         cursor = connection.cursor()
         deleted_item = int(input("Type ID number of item you wish to delete: "))
@@ -308,7 +364,7 @@ while new_launch:
         " the number seen in [square brackets] and pressing Enter."
     )
     new_launch = False
-    #sleep(3)
+    sleep(3)
 while True:
     try:
         main_menu()
@@ -342,7 +398,7 @@ while True:
             update_product()
         elif product_menu_choice == 4:
             view_list("products")
-            delete_item_new("products")
+            delete_item("products")
         else:
             print("Enter a valid option")
     while option == 2:
@@ -363,7 +419,7 @@ while True:
             update_courier()
         elif courier_menu_choice == 4:
             view_list("couriers")
-            delete_item_new("couriers")
+            delete_item("couriers")
         else:
             print(
                 "Invalid option. Please choose a correct number from the list for the corresponding action."
@@ -386,31 +442,10 @@ while True:
             update_order_status()
         elif orders_menu_choice == 4:
             view_list("orders")
-            try:
-                order_index_input = int(
-                    input("Type number of order you want to edit: ")
-                )
-                order_dict_choice = orders[order_index_input]
-                for i, key_value in enumerate(order_dict_choice.items()):
-                    print(f"[{i}] {key_value[0]}: {key_value[1]}")
-                order_key_choice = int(input("Type number of item you want to edit: "))
-                order_value_change = (
-                    input("Type input you'd like to change to: ").strip().title()
-                )
-                keys = list(order_dict_choice.keys())
-                if len(order_value_change) > 0:
-                    old_item = order_dict_choice[keys[order_key_choice]]
-                    order_dict_choice[keys[order_key_choice]] = order_value_change
-                    print(f"{old_item} changed to {order_value_change}.")
-                else:
-                    print("No changes were made as no input was given.")
-            except ValueError:
-                print("Please enter a valid number option.")
-            except IndexError:
-                print("Item number doesn't exist.")
+            update_order_details()
         elif orders_menu_choice == 5:
             view_list("orders")
-            delete_item_new("orders")
+            delete_item("orders")
         else:
             print(
                 "Invalid option. Please choose a correct number from the list for the corresponding action."
