@@ -18,11 +18,88 @@ except pymysql.OperationalError as e:
 sleep(1)
 
 def main_menu():
-    print("\n___Main Menu___")
-    print("[0] Exit App")
-    print("[1] Product Menu")
-    print("[2] Couriers Menu")
-    print("[3] Orders Menu\n")
+    while True:
+        try:
+            print("\n___Main Menu___")
+            print("[0] Exit App")
+            print("[1] Product Menu")
+            print("[2] Couriers Menu")
+            print("[3] Orders Menu\n")
+            option = int(input("Select option: "))
+        except ValueError:
+            print("Please enter a number option!")
+            continue
+        if option == 0:
+            print("\nExiting App...")
+            quit()
+        elif option not in range(4):
+            print(
+                "That number option doesn't seem to exist! Please choose a correct number from the list for the corresponding action."
+            )
+            continue
+        while option == 1:
+            product_menu()
+            try:
+                product_menu_choice = int(input("Select option: "))
+            except ValueError:
+                print("Enter a number option!")
+                continue
+            if product_menu_choice == 0:
+                break
+            elif product_menu_choice == 1:
+                view_table("products")
+            elif product_menu_choice == 2:
+                add_new_product()
+            elif product_menu_choice == 3:
+                update_product()
+            elif product_menu_choice == 4:
+                delete_item("products")
+            else:
+                print("Enter a valid option")
+        while option == 2:
+            couriers_menu()
+            try:
+                courier_menu_choice = int(input("Select option: "))
+            except ValueError:
+                print("Please enter a valid number option!")
+                continue
+            if courier_menu_choice == 0:
+                break
+            elif courier_menu_choice == 1:
+                view_table("couriers")
+            elif courier_menu_choice == 2:
+                add_new_courier()
+            elif courier_menu_choice == 3:
+                update_courier()
+            elif courier_menu_choice == 4:
+                delete_item("couriers")
+            else:
+                print(
+                    "Invalid option. Please choose a correct number from the list for the corresponding action."
+                )
+        while option == 3:
+            orders_menu()
+            try:
+                orders_menu_choice = int(input("Select option: "))
+            except ValueError:
+                print("Please enter a valid number option!")
+                continue
+            if orders_menu_choice == 0:
+                break
+            elif orders_menu_choice == 1:
+                view_table("orders")
+            elif orders_menu_choice == 2:
+                add_new_order()
+            elif orders_menu_choice == 3:
+                update_order_status()
+            elif orders_menu_choice == 4:
+                update_order_details()
+            elif orders_menu_choice == 5:
+                delete_item("orders")
+            else:
+                print(
+                    "Invalid option. Please choose a correct number from the list for the corresponding action."
+                )
     
 
 
@@ -89,7 +166,7 @@ def view_table(table):
             order_by_option = int(input("Select an option to view list sorted, or enter 0 to exit: "))
             
             if order_by_option == 0:
-                return
+                main_menu()
             elif order_by_option == 1:
                 sql = f"SELECT * FROM {table} ORDER BY name"
                 result = retrieve_fetchall(sql)
@@ -501,8 +578,6 @@ def update_product():
         print(f"ERROR: Please ensure that price is a float value")
 
 def delete_item(table):
-    if order_by_option == 0:
-        return
     try:
         view_table(table)
         sql = f"SELECT COUNT(*) FROM {table}"
@@ -558,84 +633,8 @@ while new_launch:
     )
     new_launch = False
     sleep(2)
-while True:
-    try:
-        main_menu()
-        option = int(input("Select option: "))
-    except ValueError:
-        print("Please enter a number option!")
-        continue
-    if option == 0:
-        print("\nExiting App...")
-        break
-    elif option not in range(4):
-        print(
-            "That number option doesn't seem to exist! Please choose a correct number from the list for the corresponding action."
-        )
-        continue
-    while option == 1:
-        product_menu()
-        try:
-            product_menu_choice = int(input("Select option: "))
-        except ValueError:
-            print("Enter a number option!")
-            continue
-        if product_menu_choice == 0:
-            break
-        elif product_menu_choice == 1:
-            view_table("products")
-        elif product_menu_choice == 2:
-            add_new_product()
-        elif product_menu_choice == 3:
-            update_product()
-        elif product_menu_choice == 4:
-            delete_item("products")
-        else:
-            print("Enter a valid option")
-    while option == 2:
-        couriers_menu()
-        try:
-            courier_menu_choice = int(input("Select option: "))
-        except ValueError:
-            print("Please enter a valid number option!")
-            continue
-        if courier_menu_choice == 0:
-            break
-        elif courier_menu_choice == 1:
-            view_table("couriers")
-        elif courier_menu_choice == 2:
-            add_new_courier()
-        elif courier_menu_choice == 3:
-            update_courier()
-        elif courier_menu_choice == 4:
-            delete_item("couriers")
-        else:
-            print(
-                "Invalid option. Please choose a correct number from the list for the corresponding action."
-            )
-    while option == 3:
-        orders_menu()
-        try:
-            orders_menu_choice = int(input("Select option: "))
-        except ValueError:
-            print("Please enter a valid number option!")
-            continue
-        if orders_menu_choice == 0:
-            break
-        elif orders_menu_choice == 1:
-            view_table("orders")
-        elif orders_menu_choice == 2:
-            add_new_order()
-        elif orders_menu_choice == 3:
-            update_order_status()
-        elif orders_menu_choice == 4:
-            update_order_details()
-        elif orders_menu_choice == 5:
-            delete_item("orders")
-        else:
-            print(
-                "Invalid option. Please choose a correct number from the list for the corresponding action."
-            )
+
+main_menu()
 
 while True:
     ask_save()
