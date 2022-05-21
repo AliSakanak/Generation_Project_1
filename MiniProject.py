@@ -23,6 +23,7 @@ def main_menu():
     print("[1] Product Menu")
     print("[2] Couriers Menu")
     print("[3] Orders Menu\n")
+    
 
 
 def product_menu():
@@ -48,10 +49,9 @@ def orders_menu():
     print("[0] Return to Main Menu")
     print("[1] View Orders List")
     print("[2] Create New Order")
-    print("[3] Update Existing Order Status")
+    print("[3] Update Existing Order Status") 
     print("[4] Update Existing Order Details")
     print("[5] Delete Order\n")
-
 
 # def ask_save():
 #     print("\n[1] Yes")
@@ -80,10 +80,146 @@ def view_table(table):
     if len(result) == 0:
         print(f"{table} table is empty".capitalize())
     else:
-        print(f"\n({column_names_string})")
-        for item in result:
-            print(item)
-        print(f"Number of items: {len(result)}")
+        if table == "products":
+            print(f"\n[Loading {table}] How would you like the list to be displayed?")
+            print("[0] Exit View Table")
+            print("[1] Sort Products By Name")
+            print("[2] Sort Products By Price")
+            print("[3] Sort Products By ID")
+            order_by_option = int(input("Select an option to view list sorted, or enter 0 to exit: "))
+            
+            if order_by_option == 0:
+                return
+            elif order_by_option == 1:
+                sql = f"SELECT * FROM {table} ORDER BY name"
+                result = retrieve_fetchall(sql)
+                print(f"\n({column_names_string})")
+                for item in result:
+                    print(item)
+                print(f"Number of items: {len(result)}")
+                print("\n(Results were ordered by name)")
+            elif order_by_option == 2:
+                sql = f"SELECT * FROM {table} ORDER BY price"
+                result = retrieve_fetchall(sql)
+                print(f"\n({column_names_string})")
+                for item in result:
+                    print(item)
+                print(f"Number of items: {len(result)}")
+                print("\n(Results were ordered by name)")
+            elif order_by_option == 3:
+                sql = f"SELECT * FROM {table} ORDER BY products_id"
+                result = retrieve_fetchall(sql)
+                print(f"\n({column_names_string})")
+                for item in result:
+                    print(item)
+                print(f"Number of items: {len(result)}")
+                print("\n(Results were ordered by ID)")
+        
+        elif table == "couriers":
+            print(f"\n[Loading {table}] How would you like the list to be displayed?")
+            print("[0] Exit View Table")
+            print("[1] Sort Couriers By Name")
+            print("[2] Sort Couriers By Phone Number")
+            print("[3] Sort Couriers By ID")
+            order_by_option = int(input("Select an option to view list sorted, or enter 0 to exit: "))
+            
+            if order_by_option == 0:
+                return
+            elif order_by_option == 1:
+                sql = f"SELECT * FROM {table} ORDER BY name"
+                result = retrieve_fetchall(sql)
+                print(f"\n({column_names_string})")
+                for item in result:
+                    print(item)
+                print(f"Number of items: {len(result)}")
+                print("\n(Results were ordered by name)")
+            elif order_by_option == 2:
+                sql = f"SELECT * FROM {table} ORDER BY phone_number"
+                result = retrieve_fetchall(sql)
+                print(f"\n({column_names_string})")
+                for item in result:
+                    print(item)
+                print(f"Number of items: {len(result)}")
+                print("\n(Results were ordered by phone number)")
+            elif order_by_option == 3:
+                sql = f"SELECT * FROM {table} ORDER BY couriers_id"
+                result = retrieve_fetchall(sql)
+                print(f"\n({column_names_string})")
+                for item in result:
+                    print(item)
+                print(f"Number of items: {len(result)}")
+                print("\n(Results were ordered by ID)")
+        
+        elif table == "orders":
+            print(f"\n[Loading {table}] How would you like the list to be displayed?")
+            print("[0] Exit View Table")
+            print("[1] Sort Orders By Customer Name")
+            print("[2] Sort Orders By Address")
+            print("[3] Sort Orders By Customer Phone Number")
+            print("[4] Sort Orders By Courier ID")
+            print("[5] Sort Orders By Status ID")
+            print("[6] Sort Orders By Product ID")
+            print("[7] Sort Orders By Order_ID")
+            order_by_option = int(input("Select an option to view list sorted, or enter 0 to exit: "))
+            
+            if order_by_option == 0:
+                return
+            elif order_by_option == 1:
+                sql = f"SELECT * FROM {table} ORDER BY customer_name"
+                result = retrieve_fetchall(sql)
+                print(f"\n({column_names_string})")
+                for item in result:
+                    print(item)
+                print(f"Number of items: {len(result)}")
+                print("\n(Results were ordered by customer name)")
+            elif order_by_option == 2:
+                sql = f"SELECT * FROM {table} ORDER BY customer_address"
+                result = retrieve_fetchall(sql)
+                print(f"\n({column_names_string})")
+                for item in result:
+                    print(item)
+                print(f"Number of items: {len(result)}")
+                print("\n(Results were ordered by customer_address)")
+            elif order_by_option == 3:
+                sql = f"SELECT * FROM {table} ORDER BY customer_phone"
+                result = retrieve_fetchall(sql)
+                print(f"\n({column_names_string})")
+                for item in result:
+                    print(item)
+                print(f"Number of items: {len(result)}")
+                print("\n(Results were ordered by customer phone number)")
+            elif order_by_option == 4:
+                sql = f"SELECT * FROM {table} ORDER BY couriers_ID"
+                result = retrieve_fetchall(sql)
+                print(f"\n({column_names_string})")
+                for item in result:
+                    print(item)
+                print(f"Number of items: {len(result)}")
+                print("\n(Results were ordered by courier_id)")
+            elif order_by_option == 5:
+                sql = f"SELECT * FROM {table} ORDER BY status_id"
+                result = retrieve_fetchall(sql)
+                print(f"\n({column_names_string})")
+                for item in result:
+                    print(item)
+                print(f"Number of items: {len(result)}")
+                print("\n(Results were ordered by order status_id)")
+            elif order_by_option == 6:
+                sql = f"SELECT * FROM {table} ORDER BY products_id"
+                result = retrieve_fetchall(sql)
+                print(f"\n({column_names_string})")
+                for item in result:
+                    print(item)
+                print(f"Number of items: {len(result)}")
+                print("\n(Results were ordered by Product ID)")
+            elif order_by_option == 7:
+                sql = f"SELECT * FROM {table} ORDER BY orders_id"
+                result = retrieve_fetchall(sql)
+                print(f"\n({column_names_string})")
+                for item in result:
+                    print(item)
+                print(f"Number of items: {len(result)}")
+                print("\n(Results were ordered by Order ID)")
     cursor.close()
 
 def add_new_product():
@@ -365,6 +501,8 @@ def update_product():
         print(f"ERROR: Please ensure that price is a float value")
 
 def delete_item(table):
+    if order_by_option == 0:
+        return
     try:
         view_table(table)
         sql = f"SELECT COUNT(*) FROM {table}"
