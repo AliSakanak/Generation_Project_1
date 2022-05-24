@@ -2,6 +2,7 @@ from logging import exception
 import pickle
 import pymysql
 from time import sleep
+from datetime import datetime
 # I WOULD LIKE TO ADD DATE/TIME OF ORDER CREATED
 
 try:
@@ -24,8 +25,9 @@ def print_product_menu():
     print("[0] Return to Main Menu")
     print("[1] View Products List")
     print("[2] Add New Product")
-    print("[3] Update Existing Product")
-    print("[4] Delete Product\n")
+    print("[3] Update Existing Product Details")
+    print("[4] Delete Product")
+    print("[5] Update Product Quantity\n")
 
 
 def print_couriers_menu():
@@ -45,6 +47,7 @@ def print_orders_menu():
     print("[3] Update Existing Order Status") 
     print("[4] Update Existing Order Details")
     print("[5] Delete Order\n")
+
 
 def print_main_menu():
     print("\n___Main Menu___")
@@ -67,7 +70,7 @@ def main_menu():
             quit()
         elif option not in range(4):
             print(
-                "ERROR: That number option doesn't seem to exist! Please choose a correct number from the list for the corresponding action."
+                f"ERROR: The number option you have input ({option}) does not exist. Please view the options and choose accordingly."
             )
             continue
         while option == 1:
@@ -88,8 +91,10 @@ def main_menu():
                     update_product()
                 case 4:
                     delete_item("products")
+                case 5:
+                    update_product_quantity()
                 case _:
-                    print("ERROR: Option not recognised. Please enter a valid number option.")
+                    print(f"ERROR: The number option you have input ({option}) does not exist. Please view the options and choose accordingly.")
         
         while option == 2:
             print_couriers_menu()
@@ -111,7 +116,7 @@ def main_menu():
                     delete_item("couriers")
                 case _:
                     print(
-                        "ERROR: The number option you have input does not exist. Please view the options and choose accordingly."
+                        f"ERROR: The number option you have input ({option}) does not exist. Please view the options and choose accordingly."
                     )
 
         while option == 3:
@@ -136,7 +141,7 @@ def main_menu():
                     delete_item("orders")
                 case _:
                     print(
-                    "Invalid option. Please choose a correct number from the list for the corresponding action."
+                    f"ERROR: The number option you have input ({option}) does not exist. Please view the options and choose accordingly."
                 )
 
 
@@ -158,7 +163,6 @@ def main_menu():
 #     else:
 #         print("Choose a valid option!")
 
-
 def view_table(table):
     cursor = connection.cursor()
     cursor.execute(f"SELECT * FROM {table}")
@@ -174,6 +178,7 @@ def view_table(table):
             print("[1] Sort Products By Name")
             print("[2] Sort Products By Price")
             print("[3] Sort Products By ID")
+            print("[4] Sort Products By Quantity")
             try:
                 order_by_option = int(input("Select an option to view list sorted, or enter 0 to exit: "))
             except ValueError:
@@ -189,6 +194,8 @@ def view_table(table):
                     order_by_query("price", "products", column_names_string)
                 case 3:
                     order_by_query("products_id", "products", column_names_string)
+                case 4:
+                    order_by_query("quantity", "products", column_names_string)
                 case _:
                     print(f"ERROR: That number option ({order_by_option}) does not exist.")
                     main_menu()
@@ -228,6 +235,7 @@ def view_table(table):
             print("[5] Sort Orders By Status ID")
             print("[6] Sort Orders By Product ID")
             print("[7] Sort Orders By Order_ID")
+            print("[8] Sort Orders By Time Created")
             try:
                 order_by_option = int(input("Select an option to view list sorted, or enter 0 to exit: "))
             except ValueError:
@@ -251,9 +259,15 @@ def view_table(table):
                     order_by_query("products_id", "orders", column_names_string)
                 case 7:
                     order_by_query("orders_id", "orders", column_names_string)
+                case 8:
+                    order_by_query("time_created", "orders", column_names_string)
                 case _:
                     print(f"ERROR: That number option ({order_by_option}) does not exist.")
                     main_menu()
+
+        elif table == "orders_status":
+            order_by_query("status_id", "orders_status", column_names_string)
+                
     cursor.close()
 
 
@@ -261,8 +275,12 @@ def order_by_query(column, table, column_names_string):
     sql = f"SELECT * FROM {table} ORDER BY {column}"
     result = retrieve_fetchall(sql)
     print(f"\n({column_names_string})")
-    for item in result:
-        print(item)
+    if table == "orders":
+        for item in result:
+            print (f"({item[0]}, {item[1]}, {item[2]}, {item[3]}, {item[4]}, {item[5]}, '{item[6]}', {item[7]})")
+    else:
+        for item in result:
+            print(item)
     print(f"Number of items: {len(result)}")
     print(f"\n(Results were ordered by {column})")
 
@@ -272,12 +290,13 @@ def add_new_product():
         cursor = connection.cursor()
         product_name = input("Type the name of product to add: ").title().strip()
         product_price = float(input("Type the price of the product: "))
-        if len(product_name) == 0:
+        product_quantity = int(input("Type the number quantity of the product: "))
+        if not product_name:
             print("ERROR: Product name field cannot be blank.")
             return
 
-        sql = f"INSERT INTO products (name, price) VALUES (%s,%s)"
-        cursor.execute(sql, (product_name, product_price))
+        sql = f"INSERT INTO products (name, price, quantity) VALUES (%s,%s,%s)"
+        cursor.execute(sql, (product_name, product_price, product_quantity))
         print(f"\n{product_name} successfully added to products.")
         connection.commit()
         cursor.close()
@@ -291,7 +310,7 @@ def add_new_courier():
         cursor = connection.cursor()
         courier_name = input("Type the name of courier to add: ").title().strip()
         courier_phone = input("Type the phone number of the courier: ").strip()
-        if len(courier_name) == 0 or len(courier_phone) == 0:
+        if not courier_name or not courier_phone:
             print("ERROR: When adding a new courier, fields cannot be left blank")
             return
         
@@ -300,8 +319,9 @@ def add_new_courier():
         print(f"\n{courier_name} successfully added")
         connection.commit()
         cursor.close()
+
     except ValueError:
-        print(f"Please input the correct value type for the associated field.")
+        print(f"ERROR: Please input the correct value type for the associated field.")
 
 
 def add_new_order():
@@ -310,9 +330,10 @@ def add_new_order():
         customer_name = input("Type customer name: ").title().strip()
         customer_address = input("Type customer address: ").title().strip()
         customer_phone_number = input("Type customer's phone number: ").strip()
-        if len(customer_name) == 0 or len(customer_address) == 0 or len(customer_phone_number) == 0:
+        if not customer_name or not customer_address or not customer_phone_number:
             print(f"ERROR: Input cannot be blank.")
             return
+
         view_table("products")
         products_input = input("Type ID of products you wish to order, seperated by commas: ")
         removed_spaces = products_input.replace(" ","")
@@ -321,20 +342,47 @@ def add_new_order():
         for number in listed_version:
             cursor.execute(f"SELECT * FROM mini_project.products WHERE products_id = {number}")
             products_choice = cursor.fetchone()
+            product_quantity = products_choice[3]
+            product_name = products_choice[1]
+            if product_quantity == 0:
+                print(f"A product you have tried to order ({product_name}) is out of stock. Please order products that have quantity greater than 0.")
+                return
+
             products_list_chosen.append(products_choice)
-        print(f"*{products_list_chosen} added to order*")
+        print(f"\n*{products_list_chosen} added to order*")
+
         view_table("couriers")
         courier_input = int(input("Type ID of courier you wish to use: "))
         cursor.execute(f"SELECT name FROM mini_project.couriers WHERE couriers_id = {courier_input}")
         courier_choice = cursor.fetchone()[0]
-        print(courier_choice)
-        print(f"*{courier_choice} chosen as courier*\n")
-        sql = f"""INSERT INTO mini_project.orders (customer_name, customer_address, customer_phone, couriers_id, status_id, products_id) 
-        VALUES (%s,%s,%s,%s,%s,%s)"""
-        cursor.execute(sql, (customer_name, customer_address, customer_phone_number, courier_input, 1, products_input))
+        print(f"\n*{courier_choice} chosen as courier*\n")
+
+        try:
+            for number in listed_version:
+                sql = f"UPDATE products SET quantity = quantity - 1 WHERE products_id = {number}"
+                cursor = connection.cursor()
+                cursor.execute(sql)
+        except pymysql.OperationalError:
+            print("Error: There was not enough stock of a product to perform your order.")
+            connection.rollback()
+            return
+        else:
+            connection.commit()
+        
+        sql = f"""INSERT INTO mini_project.orders (customer_name, customer_address, customer_phone, couriers_id, status_id, products_id, time_created) 
+        VALUES (%s,%s,%s,%s,%s,%s,%s)"""
+        cursor.execute(sql, (customer_name, customer_address, customer_phone_number, courier_input, 1, products_input, datetime.now()))
         connection.commit()
         cursor.close()
-        print("Order successfully created!")
+        print("Order successfully created! Order is being prepared.")
+
+        for number in listed_version:    
+            sql = f"SELECT quantity, name FROM products WHERE products_id = {number}"
+            result = retrieve_fetchone(sql)
+            new_quantity = result[0]
+            product_name = result[1]
+            print(f"As a result of this order, quantity of {product_name} has been reduced to {new_quantity}.")
+
     except ValueError:
         print("ERROR: Please enter correct number associated with courier.")
     except IndexError:
@@ -355,7 +403,7 @@ def update_product():
         user_choice = int(input("Type the product_id of item you wish to update: "))
         sql = f"SELECT * FROM products WHERE products_id = {user_choice}"
         old_item = retrieve_fetchone(sql)
-        if old_item == None:
+        if not old_item:
             print(f"ERROR: The products_id you have entered ({user_choice}) could not be found")
             return
         
@@ -368,21 +416,15 @@ def update_product():
         new_price = input("Type the updated product price, or leave blank for no change: ").strip()
 
         if new_name:
-            cursor = connection.cursor()
             sql = F"UPDATE products SET name = \'{new_name}\' WHERE products_id = {user_choice}"
-            cursor.execute(sql)
-            connection.commit()
-            cursor.close()
+            commit_query(sql)
             print(f"\n*[ID {product_id}]: Product name {old_name} updated to {new_name} successfully*")
         else:
             print(f'\n*[ID {product_id}]: Product name not changed as entry was left blank*')
 
         if new_price:
-            cursor = connection.cursor()
             sql = f"UPDATE products SET price = {new_price} WHERE (products_id = {user_choice})"
-            cursor.execute(sql)
-            connection.commit()
-            cursor.close()
+            commit_query(sql)
             print(f"*[ID {product_id}]: Price of {old_price} updated to {new_price} successfully*")
         else:
             print(f'*[ID {product_id}]: Product price not changed as entry was left blank*')
@@ -406,38 +448,45 @@ def update_courier():
         sql = (f"SELECT * FROM couriers WHERE couriers_id = {user_choice}")
         old_item = retrieve_fetchone(sql)
 
-        if old_item == None:
+        if not old_item:
             print(f"ERROR: The couriers_id you have entered ({user_choice}) could not be found")
             return
+        
+        old_name = old_item[1]
+        old_number = old_item[2]
+        courier_id = old_item[0]
         print(f"*{old_item} selected*")
 
         new_name = input("Type updated name of courier, or leave blank for no change: ").strip().title()
         new_number = input("Type the courier phone number, or leave blank for no change: ").strip()
 
-        if len(new_name) > 0:
+        if new_name:
             sql = F"UPDATE couriers SET name = \'{new_name}\' WHERE couriers_id = {user_choice}"
             commit_query(sql)
-            print(f"\n*{old_item} updated to {new_name} successfully*")
+            print(f"\n*[ID {courier_id}]: {old_name} updated to {new_name} successfully*")
         else:
-            print('\n*Product name not changed as entry was left blank*')
+            print(f"\n*[ID {courier_id}]: Product name not changed as entry was left blank*")
 
-        if len(new_number) > 0:
+        if new_number:
             sql = f"UPDATE couriers SET phone_number = {new_number} WHERE couriers_id = {user_choice}"
             commit_query(sql)
-            print(f"*{old_item} updated to {new_number} successfully*")
+            print(f"*[ID {courier_id}]: {old_number} updated to {new_number} successfully*")
         else:
-            print('*Courier phone number not changed as entry was left blank*')
+            print(f"*[ID {courier_id}]: Courier phone number not changed as entry was left blank*")
 
     except ValueError:
         print(f"ERROR: Please input the correct value type for the associated field")
     except pymysql.OperationalError:
         print(f"ERROR: operationalerror")
 
+
 def update_order_details():
     try:
-        check = view_table("orders")
-        if check == None:
-            print("Returning to orders menu")
+        view_table("orders")
+        sql = f"SELECT COUNT(*) FROM orders"
+        check_empty = retrieve_fetchone(sql)
+        if check_empty[0] == 0:
+            print("Exiting update menu")
             return
     
         order_id_input = int(input("Type the orders_id of order you wish to update: "))
@@ -447,10 +496,26 @@ def update_order_details():
         if old_order == None:
             print(f"ERROR: The orders_id you have entered ({order_id_input}) could not be found")
             return
+        
+        orders_id = old_order[0]
+        old_customer_name = old_order[1]
+        old_customer_address = old_order[2]
+        old_customer_phonenumber = old_order[3]
+        old_order_courier = old_order[4]
+        
+        old_order_products = old_order[6]
+        old_order_products_listed = old_order_products.split(",")
+        cursor = connection.cursor()
+        old_products_list = []
+        for number in old_order_products_listed:
+            cursor.execute(f"SELECT * FROM mini_project.products WHERE products_id = {number}")
+            old_product_query = cursor.fetchone()
+            old_products_list.append(old_product_query)
+        
         print(f"*{old_order} selected*")
 
         new_name = input("Type updated name of customer, or leave blank for no change: ").strip().title()
-        new_address = input("Type updated customer address, or leave blank for no change: ").strip()
+        new_address = input("Type updated customer address, or leave blank for no change: ").strip().title()
         new_phonenumber = input("Type updated customer phone number, or leave blank for no change: ").strip()
 
         view_table("products")
@@ -458,93 +523,113 @@ def update_order_details():
         removed_spaces = products_input.replace(" ","")
         listed_version = removed_spaces.split(",")
 
-        view_table("couriers")
-        courier_input = input("Type ID of courier you want to use, or leave blank for no change: ").strip()
-        if len(removed_spaces) > 0:
+        if removed_spaces:
+            try:
+                for number in listed_version:
+                    sql = f"UPDATE products SET quantity = quantity - 1 WHERE products_id = {number}"
+                    cursor = connection.cursor()
+                    cursor.execute(sql)
+            except pymysql.OperationalError:
+                print("Error: There was not enough stock of a product to perform your order.")
+                connection.rollback()
+                return
+            else:
+                connection.commit()
             products_list_chosen = []
             cursor = connection.cursor()
             for number in listed_version:
                 cursor.execute(f"SELECT * FROM mini_project.products WHERE products_id = {number}")
                 products_choice = cursor.fetchone()
                 products_list_chosen.append(products_choice)
-            print(products_list_chosen)
             sql = f"UPDATE orders SET products_id = \'{products_input}\' WHERE orders_id = {order_id_input}"
             commit_query(sql)
-            print(f"*{products_list_chosen} added to order*")
+            print(f"\n*[Order ID {orders_id}]: Products ordered changed from {old_products_list} to {products_list_chosen}*")
         else:
-            print('\n*Products ordered not changed as entry was left blank*')
+            print(f"\n*[Order ID {orders_id}]: Products ordered not changed as entry was left blank*")
+        
+        view_table("couriers")
+        courier_input = input("Type ID of courier you want to use, or leave blank for no change: ").strip()
 
-        if len(courier_input) > 0:
+        if courier_input:
             courier_input = int(courier_input)
             cursor = connection.cursor()
             sql = F"UPDATE orders SET couriers_id = \'{courier_input}\' WHERE orders_id = {order_id_input}"
             commit_query(sql)
-            print(f"\n*{old_order} updated to {courier_input} successfully*")
+            print(f"\n*[Order ID {orders_id}]: Courier_ID {old_order_courier} updated to Courier_ID {courier_input} successfully*")
         else:
-            print("\n*Courier was not changed as entry was left blank*")
+            print(f"\n*[Order ID {orders_id}]: Courier was not changed as entry was left blank*")
     
-        if len(new_name) > 0:
+        if new_name:
             cursor = connection.cursor()
             sql = F"UPDATE orders SET customer_name = \'{new_name}\' WHERE orders_id = {order_id_input}"
             commit_query(sql)
-            print(f"\n*{old_order} updated to {new_name} successfully*")
+            print(f"\n*[Order ID {orders_id}]: Customer name '{old_customer_name}' updated to '{new_name}' successfully*")
         else:
-            print('\n*Customer name not changed as entry was left blank*')
+            print(f"\n*[Order ID {orders_id}]: Customer name not changed as entry was left blank*")
 
-        if len(new_address) > 0:
+        if new_address:
             cursor = connection.cursor()
             sql = f"UPDATE orders SET customer_address = \'{new_address}\' WHERE orders_id = {order_id_input}"
             commit_query(sql)
-            print(f"*{old_order} updated to {new_address} successfully*")
+            print(f"\n*[Order ID {orders_id}]: Customer address '{old_customer_address}' updated to '{new_address}' successfully*")
         else:
-            print('\n*Customer address not changed as entry was left blank*')
+            print(f"\n*[Order ID {orders_id}]: Customer address not changed as entry was left blank*")
 
-        if len(new_phonenumber) > 0:
+        if new_phonenumber:
             cursor = connection.cursor()
             sql = f"UPDATE orders SET customer_phone= \'{new_phonenumber}\' WHERE orders_id = {order_id_input}"
             commit_query(sql)
-            print(f"*{old_order} updated to {new_phonenumber} successfully*")
+            print(f"\n*[Order ID {orders_id}]: Customer phone number '{old_customer_phonenumber}' updated to '{new_phonenumber}' successfully*")
         else:
-            print("\n*Customer phone number not changed as entry was left blank*")
+            print(f"\n*[Order ID {orders_id}]: Customer phone number not changed as entry was left blank*")
 
     except ValueError:
         print(f"ERROR: ID not found")
     except pymysql.OperationalError:
         print(f"ERROR: operationalerror")
 
+
 def update_order_status():
     try:
-        check = view_table("orders")
-        if check == None:
-            print("Returning to order menu")
+        view_table("orders")
+        sql = f"SELECT COUNT(*) FROM orders"
+        check_empty = retrieve_fetchone(sql)
+        if check_empty[0] == 0:
+            print("Exiting update menu")
             return
-
-        cursor = connection.cursor()
-        order_id_input = int(input("Type the order_id you want to update status for: "))
-        cursor.execute(f"SELECT * FROM orders WHERE orders_id = {order_id_input}")
-        old_item = cursor.fetchone()
-        print(old_item)
+        
+        order_id_input = input("Type the order_id you want to update status for: ")
+        sql = (f"SELECT * FROM orders WHERE orders_id = {order_id_input}")
+        old_item = retrieve_fetchone(sql)
+        order_id = old_item[0]
         if old_item == None:
             print(f"ERROR: The orders_id you have entered ({order_id_input}) could not be found")
             return
-        print(f"*{old_item} selected*")
+
+        print(f"*[Order ID {order_id}] selected*")
+
         view_table("orders_status")
-        new_status_input = int(input("Type status_id of status name you wish to update to, or leave blank for no change: "))
-        cursor.execute(f"SELECT name FROM orders_status WHERE status_id = {new_status_input}")
-        status_name_choice = cursor.fetchone()[0]
-        if len(str(new_status_input)) > 0:
-            cursor = connection.cursor()
+        new_status_input = input("Type status_id of status name you wish to update to, or leave blank for no change: ")
+
+        if new_status_input:
+            new_status_input = int(new_status_input)
             sql = F"UPDATE orders SET status_id = {new_status_input} WHERE orders_id = {order_id_input}"
-            cursor.execute(sql)
-            connection.commit()
-            cursor.close()
-            print(f"\n*{old_item} updated to {status_name_choice} successfully*")
+            commit_query(sql)
+            cursor = connection.cursor()
+            cursor.execute(f"SELECT name FROM orders_status WHERE status_id = {new_status_input}")
+            status_name_choice = cursor.fetchone()[0]
+            print(f"\n*[Order ID {order_id}]: Updated to {status_name_choice} successfully*")
         else:
             print('\n*Order status not changed as entry was left blank*')
+
     except ValueError:
-        print(f"ERROR: Please input the correct value type for the associated field")
+        print("ERROR: Please input the correct value type for the associated field")
     except pymysql.OperationalError:
-        print(f"ERROR: operationalerror")
+        print("ERROR: You have entered a letter where number input was needed.")
+    except TypeError:
+        print("ERROR: Order")
+    except pymysql.IntegrityError:
+        print("ERROR: The status_id you have entered does not exist.")
 
 
 def delete_item(table):
@@ -567,6 +652,7 @@ def delete_item(table):
         sql = (f"DELETE FROM {table} WHERE {table}_id = {deleted_item}")
         commit_query(sql)
         print(f"\n*Deleted {selection} from database*")
+
     except pymysql.IntegrityError:
         print(
             "ERROR: The item you are trying to delete is currently present in an order. "
@@ -574,6 +660,73 @@ def delete_item(table):
         )
     except ValueError:
         print("ERROR: You did not input an ID value. To select an item, please input the ID.")
+
+
+def update_product_quantity():
+    view_table("products")
+    sql = f"SELECT COUNT(*) FROM products"
+    check_empty = retrieve_fetchone(sql)
+    if check_empty[0] == 0:
+        print("Products list empty. Please add a product to use this feature.")
+        print("Exiting update menu")
+        return
+    try:
+        user_product_choice = int(input("Type the Products_ID to modify it's quantity: "))
+        sql = f"SELECT * FROM products WHERE products_id = {user_product_choice}"
+        old_item = retrieve_fetchone(sql)
+        if not old_item:
+            print(f"ERROR: The products_id you have entered ({user_product_choice}) could not be found")
+            return
+
+        product_id = old_item[0]
+        old_name = old_item[1]
+        old_price = old_item[2]
+        old_quantity = old_item[3]
+
+        print(f"[ID {product_id}]: {old_name} selected with a quantity of {old_quantity}.")
+
+    except ValueError:
+        print("ERROR: You have entered a letter. A number option for the ID is needed.")
+
+    print("\n___Update Product Quantity Menu___")
+    print("[0] Return To Product Menu")
+    print("[1] Add To Product's Quantity")
+    print("[2] Subtract From Product's Quantity")
+    print("[3] Manually Alter Product's Quantity")
+    try:
+        user_input = int(input("How would you like to update that product? Please select option: "))
+    except ValueError:
+        print("ERROR: You must input a number option, not a letter.")
+        return
+    try:
+        match user_input:
+            case 0:
+                return
+            case 1:
+                add_quantity = int(input(f"The quantity of {old_name} is currently at {old_quantity}. Input value you'd like to add by: ").strip())
+                new_quantity = (old_quantity + add_quantity)
+                sql = f"UPDATE products SET quantity = {new_quantity} WHERE (products_id = {user_product_choice})"
+                commit_query(sql)
+                print(f"\n*[ID {product_id}]: {old_name}'s quantity updated from {old_quantity} to {new_quantity} successfully*")
+            case 2:
+                subtract_quantity = int(input(f"The quantity of {old_name} is currently at {old_quantity}. Input value you'd like to subtract by: ").strip())
+                new_quantity = (old_quantity - subtract_quantity)
+                sql = f"UPDATE products SET quantity = {new_quantity} WHERE (products_id = {user_product_choice})"
+                commit_query(sql)
+                print(f"\n*[ID {product_id}]: {old_name}'s quantity updated from {old_quantity} to {new_quantity} successfully*")
+            case 3:
+                new_quantity = int(input(f"The quantity of {old_name} is currently at {old_quantity}. Input what you would like to update it to: ").strip())
+                sql = f"UPDATE products SET quantity = {new_quantity} WHERE (products_id = {user_product_choice})"
+                commit_query(sql)
+                print(f"\n*[ID {product_id}]: {old_name}'s quantity updated from {old_quantity} to {new_quantity} successfully*")
+            case _:
+                print(f"ERROR: That number option ({user_input}) does not exist.")
+                return
+    except ValueError:
+        print("ERROR: Quantity must be input with integer value. Decimal or letter values are not accepted.")
+    except pymysql.DataError:
+        print("ERROR: Product quantity cannot be below 0.")
+
 
 def commit_query(query):
     cursor = connection.cursor()
