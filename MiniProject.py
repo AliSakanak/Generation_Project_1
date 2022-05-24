@@ -1,5 +1,6 @@
 from logging import exception
 import pickle
+import pandas as pd
 import pymysql
 from time import sleep
 from datetime import datetime
@@ -48,13 +49,20 @@ def print_orders_menu():
     print("[4] Update Existing Order Details")
     print("[5] Delete Order\n")
 
+def print_export_menu():
+    print("\n___Export Menu___")
+    print("[0] Return To Main Menu")
+    print("[1] Export Products")
+    print("[2] Export Couriers")
+    print("[3] Export Orders\n")
 
 def print_main_menu():
     print("\n___Main Menu___")
     print("[0] Exit App")
     print("[1] Product Menu")
     print("[2] Couriers Menu")
-    print("[3] Orders Menu\n")
+    print("[3] Orders Menu")
+    print("[4] Export Database to .dat file\n")
 
 
 def main_menu():
@@ -68,7 +76,7 @@ def main_menu():
         if option == 0:
             print("\nExiting App...")
             quit()
-        elif option not in range(4):
+        elif option not in range(5):
             print(
                 f"ERROR: The number option you have input ({option}) does not exist. Please view the options and choose accordingly."
             )
@@ -143,6 +151,44 @@ def main_menu():
                     print(
                     f"ERROR: The number option you have input ({option}) does not exist. Please view the options and choose accordingly."
                 )
+
+        while option == 4:
+            print_export_menu()
+            try:
+                export_menu_choice = int(input("Select option: "))
+            except ValueError:
+                print("Please enter a valid number option!")
+                continue
+            match export_menu_choice:
+                case 0:
+                    break
+                case 1:
+                    sql = "SELECT * FROM products"
+                    data = retrieve_fetchall(sql)
+                    data_array = []
+                    for row in data:
+                        data_array.append(row)
+                    
+                    pickle.dump(data_array, open("products_data.dat", "wb"))
+                    print("Product's data saved succesfully to .dat file.")
+                case 2:
+                    sql = "SELECT * FROM couriers"
+                    data = retrieve_fetchall(sql)
+                    data_array = []
+                    for row in data:
+                        data_array.append(row)
+                    
+                    pickle.dump(data_array, open("couriers_data.dat", "wb"))
+                    print("Courier's data saved succesfully to .dat file.")
+                case 3:
+                    sql = "SELECT * FROM orders"
+                    data = retrieve_fetchall(sql)
+                    data_array = []
+                    for row in data:
+                        data_array.append(row)
+                    
+                    pickle.dump(data_array, open("orders_data.dat", "wb"))
+                    print("Order's data saved succesfully to .dat file.")
 
 
 # def ask_save():
@@ -761,5 +807,3 @@ while new_launch:
 
 main_menu()
 
-while True:
-    print("reached the end option")
