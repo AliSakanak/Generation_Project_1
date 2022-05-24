@@ -1,6 +1,5 @@
 from logging import exception
 import pickle
-from bs4 import ResultSet
 import pymysql
 from time import sleep
 # I WOULD LIKE TO ADD DATE/TIME OF ORDER CREATED
@@ -12,98 +11,15 @@ try:
     password="kelebek18",
     db="mini_project"
     )
-    print ("Connected to cafe's database")
+    print ("\n***Connected to cafe's database***")
 except pymysql.OperationalError as e:
-    print(f"Error: {e}\nUnable to successfully connect to Database.")
+    print(f"\nERROR: Unable to successfully connect to Database.\n{e}")
+    print("Please check database connection. Quitting application...\n")
+    quit()
 sleep(1)
 
-def main_menu():
-    while True:
-        try:
-            print("\n___Main Menu___")
-            print("[0] Exit App")
-            print("[1] Product Menu")
-            print("[2] Couriers Menu")
-            print("[3] Orders Menu\n")
-            option = int(input("Select option: "))
-        except ValueError:
-            print("Please enter a number option!")
-            continue
-        if option == 0:
-            print("\nExiting App...")
-            quit()
-        elif option not in range(4):
-            print(
-                "That number option doesn't seem to exist! Please choose a correct number from the list for the corresponding action."
-            )
-            continue
-        while option == 1:
-            product_menu()
-            try:
-                product_menu_choice = int(input("Select option: "))
-            except ValueError:
-                print("Enter a number option!")
-                continue
-            if product_menu_choice == 0:
-                break
-            elif product_menu_choice == 1:
-                view_table("products")
-            elif product_menu_choice == 2:
-                add_new_product()
-            elif product_menu_choice == 3:
-                update_product()
-            elif product_menu_choice == 4:
-                delete_item("products")
-            else:
-                print("Enter a valid option")
-        while option == 2:
-            couriers_menu()
-            try:
-                courier_menu_choice = int(input("Select option: "))
-            except ValueError:
-                print("Please enter a valid number option!")
-                continue
-            if courier_menu_choice == 0:
-                break
-            elif courier_menu_choice == 1:
-                view_table("couriers")
-            elif courier_menu_choice == 2:
-                add_new_courier()
-            elif courier_menu_choice == 3:
-                update_courier()
-            elif courier_menu_choice == 4:
-                delete_item("couriers")
-            else:
-                print(
-                    "Invalid option. Please choose a correct number from the list for the corresponding action."
-                )
-        while option == 3:
-            orders_menu()
-            try:
-                orders_menu_choice = int(input("Select option: "))
-            except ValueError:
-                print("Please enter a valid number option!")
-                continue
-            if orders_menu_choice == 0:
-                break
-            elif orders_menu_choice == 1:
-                view_table("orders")
-            elif orders_menu_choice == 2:
-                add_new_order()
-            elif orders_menu_choice == 3:
-                update_order_status()
-            elif orders_menu_choice == 4:
-                update_order_details()
-            elif orders_menu_choice == 5:
-                delete_item("orders")
-            else:
-                print(
-                    "Invalid option. Please choose a correct number from the list for the corresponding action."
-                )
-    
 
-
-def product_menu():
+def print_product_menu():
     print("\n___Product Menu___")
     print("[0] Return to Main Menu")
     print("[1] View Products List")
@@ -112,7 +28,7 @@ def product_menu():
     print("[4] Delete Product\n")
 
 
-def couriers_menu():
+def print_couriers_menu():
     print("\n___Couriers Menu___")
     print("[0] Return to Main Menu")
     print("[1] View Couriers List")
@@ -121,7 +37,7 @@ def couriers_menu():
     print("[4] Delete Courier\n")
 
 
-def orders_menu():
+def print_orders_menu():
     print("\n___Orders Menu___")
     print("[0] Return to Main Menu")
     print("[1] View Orders List")
@@ -129,6 +45,100 @@ def orders_menu():
     print("[3] Update Existing Order Status") 
     print("[4] Update Existing Order Details")
     print("[5] Delete Order\n")
+
+def print_main_menu():
+    print("\n___Main Menu___")
+    print("[0] Exit App")
+    print("[1] Product Menu")
+    print("[2] Couriers Menu")
+    print("[3] Orders Menu\n")
+
+
+def main_menu():
+    while True:
+        try:
+            print_main_menu()
+            option = int(input("Select option: "))
+        except ValueError:
+            print("ERROR: You entered a letter value. Please enter a number option.")
+            continue
+        if option == 0:
+            print("\nExiting App...")
+            quit()
+        elif option not in range(4):
+            print(
+                "ERROR: That number option doesn't seem to exist! Please choose a correct number from the list for the corresponding action."
+            )
+            continue
+        while option == 1:
+            print_product_menu()
+            try:
+                product_menu_choice = int(input("Select option: "))
+            except ValueError:
+                print("ERROR: You entered a letter value. Please enter a number option.")
+                continue
+            match product_menu_choice:
+                case 0:
+                    break
+                case 1:
+                    view_table("products")
+                case 2:
+                    add_new_product()
+                case 3:
+                    update_product()
+                case 4:
+                    delete_item("products")
+                case _:
+                    print("ERROR: Option not recognised. Please enter a valid number option.")
+        
+        while option == 2:
+            print_couriers_menu()
+            try:
+                courier_menu_choice = int(input("Select option: "))
+            except ValueError:
+                print("Please enter a valid number option!")
+                continue
+            match courier_menu_choice:
+                case 0:
+                    break
+                case 1:
+                    view_table("couriers")
+                case 2:
+                    add_new_courier()
+                case 3:
+                    update_courier()
+                case 4:
+                    delete_item("couriers")
+                case _:
+                    print(
+                        "ERROR: The number option you have input does not exist. Please view the options and choose accordingly."
+                    )
+
+        while option == 3:
+            print_orders_menu()
+            try:
+                orders_menu_choice = int(input("Select option: "))
+            except ValueError:
+                print("Please enter a valid number option!")
+                continue
+            match orders_menu_choice:
+                case 0:
+                    break
+                case 1:
+                    view_table("orders")
+                case 2:
+                    add_new_order()
+                case 3:
+                    update_order_status()
+                case 4:
+                    update_order_details()
+                case 5:
+                    delete_item("orders")
+                case _:
+                    print(
+                    "Invalid option. Please choose a correct number from the list for the corresponding action."
+                )
+
 
 # def ask_save():
 #     print("\n[1] Yes")
@@ -148,13 +158,14 @@ def orders_menu():
 #     else:
 #         print("Choose a valid option!")
 
+
 def view_table(table):
     cursor = connection.cursor()
     cursor.execute(f"SELECT * FROM {table}")
     result = cursor.fetchall()
     column_names = [i[0] for i in cursor.description]
     column_names_string = ", ".join(column_names).title()
-    if len(result) == 0:
+    if not result:
         print(f"{table} table is empty".capitalize())
     else:
         if table == "products":
@@ -163,34 +174,24 @@ def view_table(table):
             print("[1] Sort Products By Name")
             print("[2] Sort Products By Price")
             print("[3] Sort Products By ID")
-            order_by_option = int(input("Select an option to view list sorted, or enter 0 to exit: "))
-            
-            if order_by_option == 0:
+            try:
+                order_by_option = int(input("Select an option to view list sorted, or enter 0 to exit: "))
+            except ValueError:
+                print("ERROR: You have input a letter value where a number option is required.")
                 main_menu()
-            elif order_by_option == 1:
-                sql = f"SELECT * FROM {table} ORDER BY name"
-                result = retrieve_fetchall(sql)
-                print(f"\n({column_names_string})")
-                for item in result:
-                    print(item)
-                print(f"Number of items: {len(result)}")
-                print("\n(Results were ordered by name)")
-            elif order_by_option == 2:
-                sql = f"SELECT * FROM {table} ORDER BY price"
-                result = retrieve_fetchall(sql)
-                print(f"\n({column_names_string})")
-                for item in result:
-                    print(item)
-                print(f"Number of items: {len(result)}")
-                print("\n(Results were ordered by name)")
-            elif order_by_option == 3:
-                sql = f"SELECT * FROM {table} ORDER BY products_id"
-                result = retrieve_fetchall(sql)
-                print(f"\n({column_names_string})")
-                for item in result:
-                    print(item)
-                print(f"Number of items: {len(result)}")
-                print("\n(Results were ordered by ID)")
+            
+            match order_by_option:
+                case 0:
+                    main_menu()
+                case 1:
+                    order_by_query("name", "products", column_names_string)
+                case 2:
+                    order_by_query("price", "products", column_names_string)
+                case 3:
+                    order_by_query("products_id", "products", column_names_string)
+                case _:
+                    print(f"ERROR: That number option ({order_by_option}) does not exist.")
+                    main_menu()
         
         elif table == "couriers":
             print(f"\n[Loading {table}] How would you like the list to be displayed?")
@@ -198,35 +199,25 @@ def view_table(table):
             print("[1] Sort Couriers By Name")
             print("[2] Sort Couriers By Phone Number")
             print("[3] Sort Couriers By ID")
-            order_by_option = int(input("Select an option to view list sorted, or enter 0 to exit: "))
+            try:
+                order_by_option = int(input("Select an option to view list sorted, or enter 0 to exit: "))
+            except ValueError:
+                print("ERROR: You have input a letter value where a number option is required.")
+                main_menu()
             
-            if order_by_option == 0:
-                return
-            elif order_by_option == 1:
-                sql = f"SELECT * FROM {table} ORDER BY name"
-                result = retrieve_fetchall(sql)
-                print(f"\n({column_names_string})")
-                for item in result:
-                    print(item)
-                print(f"Number of items: {len(result)}")
-                print("\n(Results were ordered by name)")
-            elif order_by_option == 2:
-                sql = f"SELECT * FROM {table} ORDER BY phone_number"
-                result = retrieve_fetchall(sql)
-                print(f"\n({column_names_string})")
-                for item in result:
-                    print(item)
-                print(f"Number of items: {len(result)}")
-                print("\n(Results were ordered by phone number)")
-            elif order_by_option == 3:
-                sql = f"SELECT * FROM {table} ORDER BY couriers_id"
-                result = retrieve_fetchall(sql)
-                print(f"\n({column_names_string})")
-                for item in result:
-                    print(item)
-                print(f"Number of items: {len(result)}")
-                print("\n(Results were ordered by ID)")
-        
+            match order_by_option:
+                case 0:
+                    main_menu()
+                case 1:
+                    order_by_query("name", "couriers", column_names_string)
+                case 2:
+                    order_by_query("phone_number", "couriers", column_names_string)
+                case 3:
+                    order_by_query("couriers_id", "couriers", column_names_string)
+                case _:
+                    print(f"ERROR: That number option ({order_by_option}) does not exist.")
+                    main_menu()
+
         elif table == "orders":
             print(f"\n[Loading {table}] How would you like the list to be displayed?")
             print("[0] Exit View Table")
@@ -237,67 +228,44 @@ def view_table(table):
             print("[5] Sort Orders By Status ID")
             print("[6] Sort Orders By Product ID")
             print("[7] Sort Orders By Order_ID")
-            order_by_option = int(input("Select an option to view list sorted, or enter 0 to exit: "))
+            try:
+                order_by_option = int(input("Select an option to view list sorted, or enter 0 to exit: "))
+            except ValueError:
+                print("ERROR: You have input a letter value where a number option is required.")
+                main_menu()
             
-            if order_by_option == 0:
-                return
-            elif order_by_option == 1:
-                sql = f"SELECT * FROM {table} ORDER BY customer_name"
-                result = retrieve_fetchall(sql)
-                print(f"\n({column_names_string})")
-                for item in result:
-                    print(item)
-                print(f"Number of items: {len(result)}")
-                print("\n(Results were ordered by customer name)")
-            elif order_by_option == 2:
-                sql = f"SELECT * FROM {table} ORDER BY customer_address"
-                result = retrieve_fetchall(sql)
-                print(f"\n({column_names_string})")
-                for item in result:
-                    print(item)
-                print(f"Number of items: {len(result)}")
-                print("\n(Results were ordered by customer_address)")
-            elif order_by_option == 3:
-                sql = f"SELECT * FROM {table} ORDER BY customer_phone"
-                result = retrieve_fetchall(sql)
-                print(f"\n({column_names_string})")
-                for item in result:
-                    print(item)
-                print(f"Number of items: {len(result)}")
-                print("\n(Results were ordered by customer phone number)")
-            elif order_by_option == 4:
-                sql = f"SELECT * FROM {table} ORDER BY couriers_ID"
-                result = retrieve_fetchall(sql)
-                print(f"\n({column_names_string})")
-                for item in result:
-                    print(item)
-                print(f"Number of items: {len(result)}")
-                print("\n(Results were ordered by courier_id)")
-            elif order_by_option == 5:
-                sql = f"SELECT * FROM {table} ORDER BY status_id"
-                result = retrieve_fetchall(sql)
-                print(f"\n({column_names_string})")
-                for item in result:
-                    print(item)
-                print(f"Number of items: {len(result)}")
-                print("\n(Results were ordered by order status_id)")
-            elif order_by_option == 6:
-                sql = f"SELECT * FROM {table} ORDER BY products_id"
-                result = retrieve_fetchall(sql)
-                print(f"\n({column_names_string})")
-                for item in result:
-                    print(item)
-                print(f"Number of items: {len(result)}")
-                print("\n(Results were ordered by Product ID)")
-            elif order_by_option == 7:
-                sql = f"SELECT * FROM {table} ORDER BY orders_id"
-                result = retrieve_fetchall(sql)
-                print(f"\n({column_names_string})")
-                for item in result:
-                    print(item)
-                print(f"Number of items: {len(result)}")
-                print("\n(Results were ordered by Order ID)")
+            match order_by_option:
+                case 0:
+                    main_menu()
+                case 1:
+                    order_by_query("customer_name", "orders", column_names_string)
+                case 2:
+                    order_by_query("customer_address", "orders", column_names_string)
+                case 3:
+                    order_by_query("customer_address", "orders", column_names_string)
+                case 4:
+                    order_by_query("couriers_id", "orders", column_names_string)
+                case 5:
+                    order_by_query("status_id", "orders", column_names_string)
+                case 6:
+                    order_by_query("products_id", "orders", column_names_string)
+                case 7:
+                    order_by_query("orders_id", "orders", column_names_string)
+                case _:
+                    print(f"ERROR: That number option ({order_by_option}) does not exist.")
+                    main_menu()
     cursor.close()
+
+
+def order_by_query(column, table, column_names_string):
+    sql = f"SELECT * FROM {table} ORDER BY {column}"
+    result = retrieve_fetchall(sql)
+    print(f"\n({column_names_string})")
+    for item in result:
+        print(item)
+    print(f"Number of items: {len(result)}")
+    print(f"\n(Results were ordered by {column})")
+
 
 def add_new_product():
     try:
@@ -335,6 +303,7 @@ def add_new_courier():
     except ValueError:
         print(f"Please input the correct value type for the associated field.")
 
+
 def add_new_order():
     try:
         cursor = connection.cursor()
@@ -342,7 +311,7 @@ def add_new_order():
         customer_address = input("Type customer address: ").title().strip()
         customer_phone_number = input("Type customer's phone number: ").strip()
         if len(customer_name) == 0 or len(customer_address) == 0 or len(customer_phone_number) == 0:
-            print(f"Error: Input cannot be blank.")
+            print(f"ERROR: Input cannot be blank.")
             return
         view_table("products")
         products_input = input("Type ID of products you wish to order, seperated by commas: ")
@@ -367,11 +336,61 @@ def add_new_order():
         cursor.close()
         print("Order successfully created!")
     except ValueError:
-        print("Error: Please enter correct number associated with courier.")
+        print("ERROR: Please enter correct number associated with courier.")
     except IndexError:
-        print("Error: No such number item exists.")
+        print("ERROR: No such number item exists.")
     except TypeError:
-        print("Error: Values entered cannot be blank unless stated otherwise.")
+        print("ERROR: Invalid entry.")
+
+
+def update_product():
+    try:
+        view_table("products")
+        sql = f"SELECT COUNT(*) FROM products"
+        check_empty = retrieve_fetchone(sql)
+        if check_empty[0] == 0:
+            print("Exiting update menu")
+            return
+
+        user_choice = int(input("Type the product_id of item you wish to update: "))
+        sql = f"SELECT * FROM products WHERE products_id = {user_choice}"
+        old_item = retrieve_fetchone(sql)
+        if old_item == None:
+            print(f"ERROR: The products_id you have entered ({user_choice}) could not be found")
+            return
+        
+        old_name = old_item[1]
+        old_price = old_item[2]
+        product_id = old_item[0]
+        print(f"*{old_item} selected*")
+
+        new_name = input("Type updated name of product, or leave blank for no change: ").strip().title()
+        new_price = input("Type the updated product price, or leave blank for no change: ").strip()
+
+        if new_name:
+            cursor = connection.cursor()
+            sql = F"UPDATE products SET name = \'{new_name}\' WHERE products_id = {user_choice}"
+            cursor.execute(sql)
+            connection.commit()
+            cursor.close()
+            print(f"\n*[ID {product_id}]: Product name {old_name} updated to {new_name} successfully*")
+        else:
+            print(f'\n*[ID {product_id}]: Product name not changed as entry was left blank*')
+
+        if new_price:
+            cursor = connection.cursor()
+            sql = f"UPDATE products SET price = {new_price} WHERE (products_id = {user_choice})"
+            cursor.execute(sql)
+            connection.commit()
+            cursor.close()
+            print(f"*[ID {product_id}]: Price of {old_price} updated to {new_price} successfully*")
+        else:
+            print(f'*[ID {product_id}]: Product price not changed as entry was left blank*')
+
+    except ValueError:
+        print(f"ERROR: Please input the correct value type for the associated field")
+    except pymysql.OperationalError:
+        print(f"ERROR: Please ensure that price is a float value")
 
 
 def update_courier():
@@ -527,55 +546,6 @@ def update_order_status():
     except pymysql.OperationalError:
         print(f"ERROR: operationalerror")
 
-def update_product():
-    try:
-        view_table("products")
-        sql = f"SELECT COUNT(*) FROM products"
-        check_empty = retrieve_fetchone(sql)
-        if check_empty[0] == 0:
-            print("Exiting update menu")
-            return
-
-        cursor = connection.cursor()
-        user_choice = int(input("Type the product_id of item you wish to update: "))
-        cursor.execute(f"SELECT * FROM products WHERE products_id = {user_choice}")
-        old_item = cursor.fetchone()
-        if old_item == None:
-            print(f"ERROR: The products_id you have entered ({user_choice}) could not be found")
-            return
-        
-        old_name = old_item[1]
-        old_price = old_item[2]
-        product_id = old_item[0]
-        print(f"*{old_item} selected*")
-
-        new_name = input("Type updated name of product, or leave blank for no change: ").strip().title()
-        new_price = input("Type the updated product price, or leave blank for no change: ").strip()
-
-        if len(new_name) > 0:
-            cursor = connection.cursor()
-            sql = F"UPDATE products SET name = \'{new_name}\' WHERE products_id = {user_choice}"
-            cursor.execute(sql)
-            connection.commit()
-            cursor.close()
-            print(f"\n*[ID {product_id}]: Product name {old_name} updated to {new_name} successfully*")
-        else:
-            print(f'\n*[ID {product_id}]: Product name not changed as entry was left blank*')
-
-        if len(new_price) > 0:
-            cursor = connection.cursor()
-            sql = f"UPDATE products SET price = {new_price} WHERE (products_id = {user_choice})"
-            cursor.execute(sql)
-            connection.commit()
-            cursor.close()
-            print(f"*[ID {product_id}]: Price of {old_price} updated to {new_price} successfully*")
-        else:
-            print(f'*[ID {product_id}]: Product price not changed as entry was left blank*')
-
-    except ValueError:
-        print(f"ERROR: Please input the correct value type for the associated field")
-    except pymysql.OperationalError:
-        print(f"ERROR: Please ensure that price is a float value")
 
 def delete_item(table):
     try:
@@ -585,23 +555,32 @@ def delete_item(table):
         if check_empty[0] == 0:
             print("Exiting delete menu")
             return
+        
         deleted_item = int(input("Type ID number of item you wish to delete: "))
         sql = (f"SELECT * FROM {table} WHERE {table}_id = {deleted_item}")
         selection = retrieve_fetchone(sql)
-        if selection == None:
+
+        if not selection:
             print(f"\nError: Item associated with chosen ID ({deleted_item}) not found.")
             return
+    
         sql = (f"DELETE FROM {table} WHERE {table}_id = {deleted_item}")
         commit_query(sql)
         print(f"\n*Deleted {selection} from database*")
-    except Exception as e:
-        print(f"Unexpected error: {e}")
+    except pymysql.IntegrityError:
+        print(
+            "ERROR: The item you are trying to delete is currently present in an order. "
+        "The item cannot be deleted until the order is either deleted or completed."
+        )
+    except ValueError:
+        print("ERROR: You did not input an ID value. To select an item, please input the ID.")
 
 def commit_query(query):
     cursor = connection.cursor()
     cursor.execute(query)
     connection.commit()
     cursor.close()
+
 
 def retrieve_fetchone(query):
     cursor = connection.cursor()
@@ -610,6 +589,7 @@ def retrieve_fetchone(query):
     cursor.close()
     return result
 
+
 def retrieve_fetchall(query):
     cursor = connection.cursor()
     cursor.execute(query)
@@ -617,19 +597,11 @@ def retrieve_fetchall(query):
     cursor.close()
     return results
 
-connection = pymysql.connect(
-    host="localhost",
-    user="root",
-    password="kelebek18",
-    db="mini_project"
-)
-
-
 new_launch = True
 while new_launch:
     print(
         "\n*Welcome to the app! Navigate through the application by inputting"
-        " the number seen in [square brackets] and pressing Enter."
+        " the number seen in [square brackets] and pressing Enter*"
     )
     new_launch = False
     sleep(2)
@@ -637,4 +609,4 @@ while new_launch:
 main_menu()
 
 while True:
-    ask_save()
+    print("reached the end option")
