@@ -1,10 +1,9 @@
 from logging import exception
 import pickle
-import pandas as pd
 import pymysql
 from time import sleep
 from datetime import datetime
-# I WOULD LIKE TO ADD DATE/TIME OF ORDER CREATED
+
 
 try:
     connection = pymysql.connect(
@@ -163,51 +162,12 @@ def main_menu():
                 case 0:
                     break
                 case 1:
-                    sql = "SELECT * FROM products"
-                    data = retrieve_fetchall(sql)
-                    data_array = []
-                    for row in data:
-                        data_array.append(row)
-                    
-                    pickle.dump(data_array, open("products_data.dat", "wb"))
-                    print("Product's data saved succesfully to .dat file.")
+                    export_to_dat("products")
                 case 2:
-                    sql = "SELECT * FROM couriers"
-                    data = retrieve_fetchall(sql)
-                    data_array = []
-                    for row in data:
-                        data_array.append(row)
-                    
-                    pickle.dump(data_array, open("couriers_data.dat", "wb"))
-                    print("Courier's data saved succesfully to .dat file.")
+                    export_to_dat("couriers")
                 case 3:
-                    sql = "SELECT * FROM orders"
-                    data = retrieve_fetchall(sql)
-                    data_array = []
-                    for row in data:
-                        data_array.append(row)
-                    
-                    pickle.dump(data_array, open("orders_data.dat", "wb"))
-                    print("Order's data saved succesfully to .dat file.")
+                    export_to_dat("orders")
 
-
-# def ask_save():
-#     print("\n[1] Yes")
-#     print("[0] No")
-
-#     save_option = input("Would you like to save changes? ").lower().strip()
-#     if save_option == "1" or save_option == "yes":
-#         print("Saving changes...")
-#         pickle.dump(products, open("products.dat", "wb"))
-#         pickle.dump(couriers, open("couriers.dat", "wb"))
-#         pickle.dump(orders, open("orders.dat", "wb"))
-#         print("Save successful.\nProgram terminated.")
-#         quit()
-#     elif save_option == "0" or save_option == "no":
-#         print("Quitting without saving changes!\nProgram terminated.")
-#         quit()
-#     else:
-#         print("Choose a valid option!")
 
 def view_table(table):
     cursor = connection.cursor()
@@ -748,30 +708,46 @@ def update_product_quantity():
         match user_input:
             case 0:
                 return
+
             case 1:
                 add_quantity = int(input(f"The quantity of {old_name} is currently at {old_quantity}. Input value you'd like to add by: ").strip())
                 new_quantity = (old_quantity + add_quantity)
                 sql = f"UPDATE products SET quantity = {new_quantity} WHERE (products_id = {user_product_choice})"
                 commit_query(sql)
                 print(f"\n*[ID {product_id}]: {old_name}'s quantity updated from {old_quantity} to {new_quantity} successfully*")
+
             case 2:
                 subtract_quantity = int(input(f"The quantity of {old_name} is currently at {old_quantity}. Input value you'd like to subtract by: ").strip())
                 new_quantity = (old_quantity - subtract_quantity)
                 sql = f"UPDATE products SET quantity = {new_quantity} WHERE (products_id = {user_product_choice})"
                 commit_query(sql)
                 print(f"\n*[ID {product_id}]: {old_name}'s quantity updated from {old_quantity} to {new_quantity} successfully*")
+
             case 3:
                 new_quantity = int(input(f"The quantity of {old_name} is currently at {old_quantity}. Input what you would like to update it to: ").strip())
                 sql = f"UPDATE products SET quantity = {new_quantity} WHERE (products_id = {user_product_choice})"
                 commit_query(sql)
                 print(f"\n*[ID {product_id}]: {old_name}'s quantity updated from {old_quantity} to {new_quantity} successfully*")
+
             case _:
                 print(f"ERROR: That number option ({user_input}) does not exist.")
                 return
+
     except ValueError:
         print("ERROR: Quantity must be input with integer value. Decimal or letter values are not accepted.")
     except pymysql.DataError:
         print("ERROR: Product quantity cannot be below 0.")
+
+
+def export_to_dat(table):
+    sql = f"SELECT * FROM {table}"
+    data = retrieve_fetchall(sql)
+    data_array = []
+    for row in data:
+        data_array.append(row)
+    
+    pickle.dump(data_array, open(f"{table}_data.dat", "wb"))
+    print(f"{table}'s data saved succesfully to .dat file.")
 
 
 def commit_query(query):
@@ -795,6 +771,7 @@ def retrieve_fetchall(query):
     results = cursor.fetchall()
     cursor.close()
     return results
+
 
 new_launch = True
 while new_launch:
