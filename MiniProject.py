@@ -1,4 +1,3 @@
-from logging import exception
 import pickle
 import pymysql
 from time import sleep
@@ -73,7 +72,7 @@ def main_menu():
             print("ERROR: You entered a letter value. Please enter a number option.")
             continue
         if option == 0:
-            print("\nExiting App...")
+            print("\n***Exited App***\n")
             quit()
         elif option not in range(5):
             print(
@@ -283,7 +282,7 @@ def order_by_query(column, table, column_names_string):
     print(f"\n({column_names_string})")
     if table == "orders":
         for item in result:
-            print (f"({item[0]}, {item[1]}, {item[2]}, {item[3]}, {item[4]}, {item[5]}, '{item[6]}', {item[7]})")
+            print (f"({item[0]}, {item[1]}, {item[2]}, {item[3]}, {item[4]}, {item[5]}, '{item[6]}', {item[7]})") # This will throw error if new column added to orders table
     else:
         for item in result:
             print(item)
