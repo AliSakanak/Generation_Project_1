@@ -3,7 +3,6 @@ import pymysql
 from time import sleep
 from datetime import datetime
 
-
 try:
     connection = pymysql.connect(
     host="localhost",
